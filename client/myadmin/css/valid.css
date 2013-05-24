@@ -1,0 +1,22 @@
+﻿@CHARSET "UTF-8";
+
+ 
+#login div span{
+	margin-left: 10px;
+	color: #b1b1b1;
+	font-size: 11px;
+	font-style: italic;
+}
+#login div.error{
+	color: #e46c6e;
+	width:200px; 
+}
+ 
+#login input.error{
+	background-image:url(../images/inputbg2.png); height:44px; padding:0 15px; line-height:42px; border:0px; width:222px; color:#0099FF; font-size:16px; font-family:Arial, Helvetica, sans-serif; font-weight:bold;
+}
+#error{
+	margin-bottom: 20px;
+	border: 1px solid #efefef;
+}
+ 

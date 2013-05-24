@@ -1,0 +1,8 @@
+set from="salzh <salzh@mazal.net.cn>"
+set move=no
+set read_only=no
+set realname="salzh"
+set use_from=yes
+set user_agent=no
+set sendmail="/usr/sbin/sendmail -oem -oit"
+

@@ -1,0 +1,43 @@
+#!/usr/bin/php -q
+<?php
+/*
+*mytts.agi is for play chinese text
+*$Id: mytts.agi 707 2009-09-18 06:48:28Z salzh $
+*/
+
+require_once "phpagi.php";
+require_once "phpagi-asmanager.php";
+
+$script = $argv[0];
+$text = $argv[1];
+$lang = $argv[2];
+
+$agi = new AGI();
+
+$agi->verbose("mytts.agi started: $text, $lang\n");
+$agi->answer();
+
+if (!$text) {
+	exit;
+}
+
+$fname = md5($text);
+$tmptxtfile = "/tmp/" . $fname . ".txt";
+$tmpwavfile = "/tmp/" . $fname . ".wav";
+
+if (!file_exists($tmpwavfile)) {
+	if (!file_exists($tmptxtfile)) {
+		$fp = fopen($tmptxtfile, 'w');
+		fputs($fp, $text);
+		fclose($fp);
+	}
+	shell_exec("/usr/local/bin/tts $tmptxtfile $tmpwavfile $lang > /dev/null 2>&1");
+}
+
+if (!file_exists($tmpwavfile)) {
+	$agi->verbose("fail to run tts!!!");
+	exit;
+}
+
+$ret = $agi->stream_file("/tmp/$fname", '');
+?>

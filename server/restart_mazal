@@ -1,0 +1,29 @@
+#!/usr/bin/perl
+
+my @pid = ();
+
+for $l (`ps aux | grep 'ssh -N' | grep -v 'grep'`) {
+    warn $l;
+    my @f = split /\s+/, $l;
+    push @pid, $f[1];
+}
+
+for $l (`ps aux | grep 'mazal.pl' | grep -v 'grep'`) {
+    warn $l;
+    my @f = split /\s+/, $l;
+    push @pid, $f[1];
+}
+
+for $l (`ps aux | grep 'dialer.pl' | grep -v 'grep'`) {
+    warn $l;
+    my @f = split /\s+/, $l;
+    push @pid, $f[1];
+}
+warn join " ", @pid;
+kill 9, @pid;
+
+
+system("ssh -N -f -L 3306:127.0.0.1:3306 -oPort=2022 61.152.175.238");
+system("cd /salzh/mazalcenternew && perl mazal.pl -c dialer.conf -d");
+
+print "DONE!!!\n";

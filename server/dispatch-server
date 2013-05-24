@@ -1,0 +1,109 @@
+#!/usr/bin/perl
+
+BEGIN {
+	chdir '/salzh/mazalcenternew';
+	unshift @INC, './lib';
+}
+
+use POSIX 'setsid';
+
+my $script = "mazal.pl";
+
+my $act = shift;
+my $sysname = `cat /etc/mazal.conf`;
+my $conf    = '';
+if ($sysname =~ /autodial/i) {
+	$conf   = '/salzh/mazalcenternew/autodial.conf';
+	#$script = 'autodial2';
+} elsif ($sysname =~ /broadcast/i) {
+	$conf   = '/salzh/mazalcenternew/broadcast.conf';
+} else {
+	$conf   = '/salzh/mazalcenternew/groupnotice.conf';
+	#$script = 'center2';
+}
+
+if ($act && $act eq 'help') {
+	usage();
+}
+if ($act && $act eq 'start') {
+	if (check_dispatch() ) {
+		warn "dispatch already running, please run 'restart' instead!!\n";
+		exit 0;
+	}
+	
+	start_dispatch();
+	warn "dispatch started!\n";
+	exit 0;
+}
+if ($act && $act eq 'restart') {
+	my @pids = check_dispatch();
+	if (@pids) {
+		kill 2, @pids;
+	}
+	start_dispatch();
+	warn "dispatch started!!!\n";
+	exit 0;
+}
+if ($act && $act eq 'stop') {
+	my @pids = check_dispatch();
+	if (@pids) {
+		kill 2, @pids;
+	} else {
+		warn "dispatch not running!!\n";
+	}
+	warn "dispatch stop!!!\n";
+	exit 0;
+}	
+	
+
+my $d = Dispatch2->new;
+
+while (1) {
+	warn "Restart dispatch!!!\n";
+	stop_dispatch();
+	start_dispatch();
+	sleep 300;
+}
+
+sub usage {
+	print <<".";
+start
+restart
+stop
+.
+exit 0;
+}
+
+#check if dispatch already exists
+sub check_dispatch {
+	my $ps = `ps aux | grep "$script" -i | grep -v "grep"`;
+	if (!$ps) {
+		#warn "dispatch not running yet!!\n";
+		return;
+	}	
+	my @pids = ();
+	for (my @lines =  split "\n", $ps) {
+		my @fields = split /\s+/, $_;
+		push @pids, $fields[1];
+	}
+	return @pids;
+}
+
+
+sub start_dispatch {
+	die "fail to fork" unless defined (my $child = fork);
+	if ($child) {
+		return;
+	}
+	setsid;	
+	system ("./$script -c $conf -d > /dev/null 2>&1") == 0 ||
+				die "start dispatch fail: $@";
+	exit 0;
+}
+
+sub stop_dispatch {
+	my @pids = check_dispatch();
+	if (@pids) {
+		kill 2, @pids;
+	}
+}
